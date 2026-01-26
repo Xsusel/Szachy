@@ -32,7 +32,7 @@ function onDrop (source, target) {
 }
 
 function makeBotMove() {
-    $status.text("XsusBot (Stockfish 17.1) myśli...")
+    $status.text("XsusBot myśli...")
 
     $.ajax({
         url: '/move',
