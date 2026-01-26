@@ -15,20 +15,71 @@ function onDragStart (source, piece, position, orientation) {
 }
 
 function onDrop (source, target) {
-  // see if the move is legal
-  var move = game.move({
+  // check for promotion
+  var move_cfg = {
     from: source,
     to: target,
-    promotion: 'q' // NOTE: always promote to a queen for example simplicity
-  })
+    promotion: 'q' // Temporary check for legality
+  };
+
+  // check if move is legal
+  var move = game.move(move_cfg);
 
   // illegal move
-  if (move === null) return 'snapback'
+  if (move === null) return 'snapback';
 
-  updateStatus()
+  // Undo the temporary move to handle promotion properly if needed
+  game.undo();
 
-  // Make call to bot
-  window.setTimeout(makeBotMove, 250)
+  // Check if it's a promotion
+  var sourcePiece = game.get(source);
+  var isPromotion = (sourcePiece.type === 'p' &&
+                    ((sourcePiece.color === 'w' && target.charAt(1) === '8') ||
+                     (sourcePiece.color === 'b' && target.charAt(1) === '1')));
+
+  if (isPromotion) {
+      showPromotionDialog(source, target);
+      return;
+  }
+
+  // Regular move
+  game.move({
+      from: source,
+      to: target
+  });
+
+  updateStatus();
+  window.setTimeout(makeBotMove, 250);
+}
+
+function showPromotionDialog(source, target) {
+    // Determine promotion color to show correct pieces in modal
+    var turn = game.turn();
+    var colorPrefix = (turn === 'w') ? 'w' : 'b';
+
+    // Update image sources dynamically
+    $('#promo-q').attr('src', '/static/img/chesspieces/wikipedia/' + colorPrefix + 'Q.svg');
+    $('#promo-r').attr('src', '/static/img/chesspieces/wikipedia/' + colorPrefix + 'R.svg');
+    $('#promo-b').attr('src', '/static/img/chesspieces/wikipedia/' + colorPrefix + 'B.svg');
+    $('#promo-n').attr('src', '/static/img/chesspieces/wikipedia/' + colorPrefix + 'N.svg');
+
+    $('#promotion-modal').show();
+    $('#promotion-modal').data('move', {source: source, target: target});
+}
+
+function commitPromotion(pieceType) {
+    $('#promotion-modal').hide();
+    var moveData = $('#promotion-modal').data('move');
+
+    game.move({
+        from: moveData.source,
+        to: moveData.target,
+        promotion: pieceType
+    });
+
+    board.position(game.fen());
+    updateStatus();
+    window.setTimeout(makeBotMove, 250);
 }
 
 function makeBotMove() {
@@ -112,6 +163,7 @@ function updateStatus () {
 var config = {
   draggable: true,
   position: 'start',
+  pieceTheme: '/static/img/chesspieces/wikipedia/{piece}.svg',
   onDragStart: onDragStart,
   onDrop: onDrop,
   onSnapEnd: onSnapEnd

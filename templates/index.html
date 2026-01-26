@@ -20,6 +20,19 @@
         <button id="flipBtn">Obróć Szachownicę</button>
     </div>
     <div id="fen"></div>
+
+    <!-- Promotion Modal -->
+    <div id="promotion-modal" class="modal">
+        <div class="modal-content">
+            <h3>Wybierz figurę do promocji:</h3>
+            <div class="promotion-pieces">
+                <img src="/static/img/chesspieces/wikipedia/wQ.svg" onclick="commitPromotion('q')" id="promo-q">
+                <img src="/static/img/chesspieces/wikipedia/wR.svg" onclick="commitPromotion('r')" id="promo-r">
+                <img src="/static/img/chesspieces/wikipedia/wB.svg" onclick="commitPromotion('b')" id="promo-b">
+                <img src="/static/img/chesspieces/wikipedia/wN.svg" onclick="commitPromotion('n')" id="promo-n">
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- JS Libraries -->
